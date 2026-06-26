@@ -96,6 +96,16 @@ E[tokens / round] = (1 − α^(k+1)) / (1 − α)
 confirmed tokens (the accepted prefix plus the one corrected/bonus token), which
 recovers the `1 + kα` accounting used in the reading notes for small α.
 
+A self-contained derivation of all three results above — distribution
+preservation, the acceptance probability `α = Σ min(p, q) = 1 − TV(p, q)`, and the
+expected tokens per round, including the exact relationship between the geometric
+form and the `1 + kα` estimate — is in
+[`notes/derivation-acceptance-sampling.md`](notes/derivation-acceptance-sampling.md);
+each claim there names the test that verifies it numerically. The way α and
+accepted-tokens-per-round vary with the draft length `k` is measured on real
+GPT-2 in
+[`experiments/02-draft-length-sweep/`](experiments/02-draft-length-sweep/).
+
 ## Repository layout
 
 ```
