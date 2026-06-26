@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "specdec"
+version = "0.1.0"
+description = "From-scratch speculative decoding for autoregressive language models"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Heojun Hur" }]
+dependencies = [
+    "torch>=2.6,<2.7",
+    "transformers>=4.49,<4.50",
+    "numpy>=2.2,<3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3,<9", "ruff>=0.9,<0.10"]
+
+[tool.setuptools]
+packages = ["specdec"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E741"]
