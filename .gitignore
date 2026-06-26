@@ -1,3 +1,6 @@
+# Claude Code local guidance file (not part of the public portfolio)
+CLAUDE.md
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
