@@ -89,6 +89,35 @@ of one proposal per round (see Section 3).
 *Verified by:*
 `tests/test_acceptance_theory.py::test_marginal_acceptance_probability_equals_overlap`.
 
+### Temperature dependence of $\alpha$
+
+Because $\alpha = 1 - \mathrm{TV}(p, q)$ depends only on how close the two
+distributions are, the softmax temperature $T$ has a predictable effect. Write the
+temperature-scaled distributions $p_T(x) \propto \exp(\ell^p_x / T)$ and
+$q_T(x) \propto \exp(\ell^q_x / T)$ from the target and draft logits $\ell^p, \ell^q$.
+The two limits are exact:
+
+- **$T \to \infty$:** both $p_T$ and $q_T$ converge to the uniform distribution, so
+  $\mathrm{TV}(p_T, q_T) \to 0$ and $\alpha \to 1$. Every draft token is accepted in
+  the limit, because the draft and target agree (both are uniform).
+- **$T \to 0^+$:** both collapse onto their argmaxes. A single draft token is then
+  accepted iff $\arg\max q = \arg\max p$, so $\alpha \to \mathbb{1}[\arg\max q = \arg\max p]$
+  at a fixed context, and averaged over contexts the sampling acceptance approaches
+  the greedy argmax-agreement rate.
+
+The two limits are typically *different* values ($\alpha \to \text{argmax-agreement}$
+versus $\alpha \to 1$), so $\alpha(T)$ need not be monotone: it is high at both ends
+and dips in between, where the temperature-scaled distributions are sharp enough to
+concentrate mass on a few tokens yet not so sharp that they have collapsed onto a
+shared argmax. The toy temperature sweep in
+[experiment 03](../experiments/03-toy-acceptance-sweep/) measures exactly this
+U-shape: $\alpha$ bottoms out at $0.27$ near $T = 0.2$, rises back toward the
+greedy argmax-agreement rate ($\approx 0.97$ for this pair) as $T \to 0$, and climbs
+toward $1$ as $T$ grows (reaching $0.93$ at $T = 4$). Losslessness (Section 1) is
+independent of $T$: the emitted token is exactly $p_T$-distributed at every
+temperature, so temperature trades output diversity against acceptance without ever
+biasing the output distribution.
+
 ## 3. Expected confirmed tokens per round
 
 Assume the standard analysis model of Leviathan et al. (2023): within a round the
