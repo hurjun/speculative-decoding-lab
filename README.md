@@ -59,6 +59,39 @@ ranking of backends here should not be extrapolated to server GPUs. The point of
 the table is the *mechanism* (α, accepted tokens per round, the cost/acceptance
 trade-off, and the regime dependence), all measured directly.
 
+### Analysis: how acceptance moves with draft length and temperature
+
+The table above fixes `k = 4` and greedy decoding. To see how the two model-level
+quantities — the acceptance rate α and the confirmed tokens per round — respond to
+the draft length `k` and to the sampling temperature, the figure below sweeps both
+on the fully offline toy backend (the same randomly-initialized GPT-2 pair the
+tests use, so the study reproduces from a clean checkout with no download). The
+greedy half is bit-for-bit deterministic; the sampling half is seeded and averaged
+over 8 generator seeds. Full tables, the script, and the raw CSVs are in
+[`experiments/03-toy-acceptance-sweep/`](experiments/03-toy-acceptance-sweep/).
+
+![acceptance vs draft length and temperature](experiments/03-toy-acceptance-sweep/results/acceptance_sweep.png)
+
+- **(a) Confirmed tokens per round follow the geometric model.** Measured greedy
+  tokens per round track `(1 − α^(k+1)) / (1 − α)` (with α the `k = 1` acceptance)
+  to within 0.35 token across `k = 1..8`, an empirical check of the derivation in
+  [`notes/derivation-acceptance-sampling.md`](notes/derivation-acceptance-sampling.md).
+- **(b) On homogeneous random weights, per-position acceptance does not decay with
+  depth.** The toy `accepted / proposed` stays near 0.95 and sits at or above the
+  constant-α envelope, whereas the *same* measurement on real GPT-2 falls from
+  0.902 to 0.562 as `k` grows
+  ([experiment 02](experiments/02-draft-length-sweep/)). The gap is informative:
+  the constant-α model is near-exact for the structureless toy backend but only an
+  upper bound for real text, where positions deeper in a round are conditionally
+  harder.
+- **(c) Acceptance is U-shaped in temperature, between two analytic limits.**
+  Under sampling, α bottoms out near `T = 0.2` (0.27) and rises on both sides —
+  toward the greedy argmax-agreement rate (≈ 0.97) as `T → 0`, and toward 1 as
+  `T → ∞` — exactly as `α = 1 − TV(p, q)` predicts: low temperature concentrates
+  `p` and `q` on their argmaxes (which usually agree), high temperature flattens
+  both toward uniform (which always agrees), and the most dissimilar distributions
+  sit in between. Output stays exactly target-distributed at every temperature.
+
 ## The algorithm
 
 Each round generates one or more confirmed tokens:
